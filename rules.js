@@ -1,4 +1,12 @@
 Rule = function (validateFn, statusCode, message) {
+	if (!(this instanceof Rule)) {
+		return new Rule(validateFn, statusCode, message);
+	}
+	if (typeof statusCode == 'string' && _.isUndefined(message)) {
+		message = statusCode;
+		statusCode = 400;
+	}
+
 	this.rules = validateFn;
 	this.statusCode = statusCode;
 	this.message = message;

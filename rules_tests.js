@@ -103,3 +103,38 @@ Tinytest.add('Rules - respects short circut param', function (test) {
 	test.equal(errors.length, 1);
 	test.equal(errors[0].reason, 'required');
 });
+
+Tinytest.add('Rules - returns a new rule if called without new operator', function (test) {
+	var rule = Rule(_.isString);
+
+	test.instanceOf(rule, Rule);
+
+	test.isTrue(rule.match(''));
+	test.isFalse(rule.match(1));
+});
+
+Tinytest.add('Rules - treats statusCode as optional (defaults to 400)', function (test) {
+	var rule = new Rule(_.isString, 'must be a string');
+
+	test.throws(function () {
+		rule.check(1);
+	}, 'must be a string [400]');
+
+});
+
+// XXX implement and test some built in helpers:
+// Rule.optional(isNullFn), converts a rule into an optional rule, useful
+// for when a rule tests for a type (eg _.isNumber) but that value is optional
+// the optional argument is a function which tests for emptiness, defaults to
+// _.isUndefined && _.isNull
+// Rule.internal(externalError), prevents rule from throwing client visible
+// errors when run on the server, the optional argument is an error object
+// eg: {message: 'access denied', statusCode: 403}
+
+// XXX implement and test some built in rules:
+// _.is*
+// etc.
+
+// XXX Rule(x) should return new Rule(x)
+
+// XXX Rule should accept fn, message as paramaters (status code should be optional and should default to 400)
