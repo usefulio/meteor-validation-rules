@@ -1,7 +1,7 @@
 {
   "name": "rules",
   "description": "A tiny package to replace meteor's Match package.",
-  "homepage": "",
+  "homepage": "https://github.com/cwohlman/meteor-validation-rules",
   "author": "Joshua Ohlman <codewriterohs@gmail.com>",
   "version": "0.0.1",
   "git": "https://github.com/cwohlman/meteor-validation-rules.git",
