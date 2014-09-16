@@ -75,10 +75,17 @@ Rule.prototype.errors = function (value, context, message, shortCircut) {
 	return errors;
 };
 
-Rule.prototype.throwOnInvalid = Rule.prototype.check;
-Rule.prototype.isValid = Rule.prototype.match;
-Rule.prototype.validationErrors = Rule.prototype.errors;
+Rule.emptynessFn = function (value) {
+	return _.isNull(value) || _.isUndefined(value);
+};
 
-Rule.prototype.isNotValid = function () {
-	return !this.isValid.apply(this, arguments);
+Rule.prototype.optional = function (emptynessFn) {
+	var original = this;
+	emptynessFn = emptynessFn || Rule.emptynessFn;
+	var self = new Rule(original);
+	self.errors = function (value) {
+		if (emptynessFn(value)) return [];
+		else return Rule.prototype.errors.apply(this, arguments);
+	};
+	return self;
 };
