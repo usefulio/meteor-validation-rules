@@ -5,8 +5,11 @@ _.chain(_)
 	.filter(function (a) {
 		return a.slice(0, 2) == 'is';
 	}).each(function (a) {
-		var name = a.slice(2).toLowerCase();
-		Rule[a] = new Rule(_[a], 'must be ' + name);
+		var name = a.slice(2);
+		Rule[a] = new Rule(_[a], 'must be ' + name.toLowerCase());
+		Rule["not" + name] = new Rule(function (val) {
+			return !_[a](val);
+		}, 'must not be ' + name.toLowerCase());
 	});
 
 // instanceof generator
