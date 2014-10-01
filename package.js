@@ -6,6 +6,8 @@ Package.describe({
 });
 
 Package.on_use(function (api, where) {
+  api.versionsFrom('0.9.0');
+  
   api.use('underscore');
 
   api.add_files('rules.js', ['client', 'server']);
