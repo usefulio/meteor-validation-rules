@@ -20,6 +20,23 @@ Rule.instanceOf = function (constructor, name) {
 	}, 'must be a ' + (name || constructor.name));
 };
 
+Rule.oneOf = function (options, message) {
+	Rule.isArray.check(options);
+	Rule.isString.optional().check(message);
+
+	if (!message) {
+		message = 'must be one of ' + (
+			_.all(options, _.isString) ?
+			"[" + options.join(',') + "]" :
+			"options"
+			);
+	}
+
+	return new Rule(function (val) {
+		return _.contains(options, val);
+	}, message);
+};
+
 // string rules
 Rule.maxLength = function (length, message) {
 	Rule.isNumber.check(length);
