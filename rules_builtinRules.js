@@ -41,13 +41,13 @@ Rule.oneOf = function (options, message) {
 Rule.maxLength = function (length, message) {
 	Rule.isNumber.check(length);
 	return new Rule(function (val) {
-		return val.length <= length;
+		return val && val.length <= length;
 	}, message || ('may not be longer than ' + length));
 };
 Rule.minLength = function (length, message) {
 	Rule.isNumber.check(length);
 	return new Rule(function (val) {
-		return val.length >= length;
+		return val && val.length >= length;
 	}, message || ('may not be shorter than ' + length));
 };
 Rule.matchesRegex = function (regex, message) {
