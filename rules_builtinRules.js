@@ -20,34 +20,59 @@ Rule.instanceOf = function (constructor, name) {
 	}, 'must be a ' + (name || constructor.name));
 };
 
-Rule.oneOf = function (options, message) {
-	Rule.isArray.check(options);
+Rule.oneOf = function (_options, message) {
+	Rule.isArray.check(_options);
 	Rule.isString.optional().check(message);
+
+
+	var options = _options;
+	if (_.all(options, function (a) {
+		return _.isString(a) || _.isNumber(a);
+	})) {
+		options = _.map(options, function (a) {
+			return {
+				_id: a
+				, name: a
+			};
+		});
+	}
+
+	var conforms = _.all(options, function (a) {
+		return _.isObject(a) && (_.isString(a._id) || _.isNumber(a._id));
+	});
 
 	if (!message) {
 		message = 'must be one of ' + (
-			_.all(options, _.isString) ?
-			"[" + options.join(',') + "]" :
+			conforms ?
+			"[" + _.map(options, function (a) {
+				return a.name || a._id;
+			}).join(', ') + "]" :
 			"options"
 			);
 	}
-
-	return new Rule(function (val) {
-		return _.contains(options, val);
+	var result = new Rule(function (val) {
+		return conforms ?
+			_.any(options, function (a) {return a._id == val;}) :
+			_.contains(_options, val);
 	}, message);
+
+	if (conforms) result.options = options;
+	else result._options = _options;
+
+	return result;
 };
 
 // string rules
 Rule.maxLength = function (length, message) {
 	Rule.isNumber.check(length);
 	return new Rule(function (val) {
-		return val && val.length <= length;
+		return !(_.isNull(val) || _.isUndefined(val)) && val.length <= length;
 	}, message || ('may not be longer than ' + length));
 };
 Rule.minLength = function (length, message) {
 	Rule.isNumber.check(length);
 	return new Rule(function (val) {
-		return val && val.length >= length;
+		return !(_.isNull(val) || _.isUndefined(val)) && val.length >= length;
 	}, message || ('may not be shorter than ' + length));
 };
 Rule.matchesRegex = function (regex, message) {

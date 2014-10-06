@@ -566,6 +566,48 @@ _.each([
 				1,2,4,5
 			]
 		}
+		, {
+			name: "oneOf"
+			, expectedError: 'must be one of [a, b, c]'
+			, param: ['a', 'b', 'c']
+			, validValues: [
+				'a'
+				, 'b'
+				, 'c'
+			]
+			, invalidValues:[
+				1,2,4,5
+				, 'aa'
+				, '1'
+				, 'd'
+				, {}
+				, []
+				, null
+			]
+		}
+		, {
+			name: "oneOf"
+			, expectedError: 'must be one of [A, B, C]'
+			, param: [
+				{_id: 'a', name: 'A'}
+				, {_id: 'b', name: 'B'}
+				, {_id: 'c', name: 'C'}
+				]
+			, validValues: [
+				'a'
+				, 'b'
+				, 'c'
+			]
+			, invalidValues:[
+				1,2,4,5
+				, 'aa'
+				, '1'
+				, 'd'
+				, {}
+				, []
+				, null
+			]
+		}
 	], function (a) {
 		var name = a.name;
 		if (a.param) {
