@@ -33,8 +33,8 @@ Tinytest.add('Rules - errors function', function (test) {
 });
 
 Tinytest.add('Rules - message', function (test) {
-	test.equal(new Rule(existsTest, 400, existsMessage).errors('')[0].reason, existsMessage);
-	test.equal(new Rule(existsTest, 400, existsMessage).errors('', null, extendedMessage)[0].reason, extendedMessage + ' ' + existsMessage);
+	test.equal(new Rule(existsTest, 400, existsMessage).errors('')[0].message, existsMessage);
+	test.equal(new Rule(existsTest, 400, existsMessage).errors('', null, extendedMessage)[0].message, extendedMessage + ' ' + existsMessage);
 });
 
 Tinytest.add('Rules - accepts rule as parameter', function (test) {
@@ -90,8 +90,8 @@ Tinytest.add('Rules - reports all errors', function (test) {
 		]);
 	var errors = rule.errors(null);
 	test.equal(errors.length, 2);
-	test.equal(errors[0].reason, 'required');
-	test.equal(errors[1].reason, 'string');
+	test.equal(errors[0].message, 'required');
+	test.equal(errors[1].message, 'string');
 });
 
 Tinytest.add('Rules - respects short circut param', function (test) {
@@ -101,7 +101,7 @@ Tinytest.add('Rules - respects short circut param', function (test) {
 		]);
 	var errors = rule.errors(null, null, '', true);
 	test.equal(errors.length, 1);
-	test.equal(errors[0].reason, 'required');
+	test.equal(errors[0].message, 'required');
 });
 
 Tinytest.add('Rules - returns a new rule if called without new operator', function (test) {
@@ -137,6 +137,18 @@ Tinytest.add('Rules - helper functions - optional helper returns an optional rul
 
 	test.isTrue(rule.optional(falsy).match(0));
 	test.isTrue(rule.optional(falsy).match(false));
+});
+
+Tinytest.add('Rules - helper functions - internal helper does not throw Meteor exceptions', function (test) {
+	var rule  = new Rule(_.isString, 'must be a string');
+
+	// just double check we're throwing the right error anyway :)
+	test.throws(function () {rule.check(0);}, 'must be a string [400]');
+	
+	test.throws(function () {rule.internal().check(0);}, /^must be a string$/);
+	test.throws(function () {
+		rule.internal({message: 'access denied', statusCode: 403}).check(0);
+	}, 'access denied [403]');
 });
 
 // XXX implement and test some built in helpers:
