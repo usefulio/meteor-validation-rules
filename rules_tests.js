@@ -139,6 +139,23 @@ Tinytest.add('Rules - helper functions - optional helper returns an optional rul
 	test.isTrue(rule.optional(falsy).match(false));
 });
 
+Tinytest.add('Rules - helper functions - required helper returns an required rule', function (test) {
+	var rule = new Rule(function () {return true;});
+	var falsy = function (value) {
+		return !value;
+	};
+	var empty;
+
+	test.isFalse(rule.required().match());
+	test.isFalse(rule.required().match(empty));
+	test.isFalse(rule.required().match(null));
+	test.isTrue(rule.required().match(0));
+	test.isTrue(rule.required().match(false));
+
+	test.isFalse(rule.required(falsy).match(0));
+	test.isFalse(rule.required(falsy).match(false));
+});
+
 Tinytest.add('Rules - helper functions - internal helper does not throw Meteor exceptions', function (test) {
 	var rule  = new Rule(_.isString, 'must be a string');
 

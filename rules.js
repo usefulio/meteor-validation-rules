@@ -76,12 +76,30 @@ Rule.emptynessFn = function (value) {
 	return _.isNull(value) || _.isUndefined(value);
 };
 
+Rule.requiredMessage = "required";
+
 Rule.prototype.optional = function (emptynessFn) {
 	var original = this;
 	emptynessFn = emptynessFn || Rule.emptynessFn;
 	var self = new Rule(original);
 	self.errors = function (value) {
 		if (emptynessFn(value)) return [];
+		else return Rule.prototype.errors.apply(this, arguments);
+	};
+	return self;
+};
+
+Rule.prototype.required = function (emptynessFn, requiredMessage) {
+	var original = this;
+	emptynessFn = emptynessFn || Rule.emptynessFn;
+	requiredMessage = requiredMessage || Rule.requiredMessage;
+	var self = new Rule(original);
+	self.errors = function (value, context, message) {
+		if (emptynessFn(value)) return [{
+			message: Rule.prototype.makeMessage.call({
+				message: requiredMessage
+			}, message)
+		}];
 		else return Rule.prototype.errors.apply(this, arguments);
 	};
 	return self;
