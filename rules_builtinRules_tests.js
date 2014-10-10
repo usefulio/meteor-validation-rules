@@ -608,6 +608,87 @@ _.each([
 				, null
 			]
 		}
+		, {
+			name: "number"
+			, expectedError: 'must be a number'
+			, validValues: [
+				'0'
+				, 0
+				, '1'
+				, 1
+				, '10'
+				, 10
+			]
+			, invalidValues: [
+				, 'aa'
+				, 'd'
+				, {}
+				, []
+				, null
+			]
+		}
+		, {
+			name: "text"
+			, expectedError: 'must be text'
+			, validValues: [
+				'0'
+				, '1'
+				, '10'
+				, 'aa'
+				, 'd'
+			]
+			, invalidValues: [
+				1,2,4,5
+				, {}
+				, []
+				, null
+			]
+		}
+		// I'm not going to test the email regex, since I know it won't pass all
+		// valid email addresses.
+		
+		// , {
+		// 	name: "email"
+		// 	, expectedError: 'must be a valid email address'
+		// 	, validValues: [
+		// 		// example valid emails from:
+		// 		// http://codefool.tumblr.com/post/15288874550/list-of-valid-and-invalid-email-addresses
+		// 		'email@example.com'
+		// 		, 'firstname.lastname@example.com'
+		// 		, 'email@subdomain.example.com'
+		// 		, 'firstname+lastname@example.com'
+		// 		// we don't support these:
+		// 		// , 'email@123.123.123.123'
+		// 		// , 'email@[123.123.123.123]'
+		// 		// , '"email"@example.com'
+		// 		, '1234567890@example.com'
+		// 		, 'email@example-one.com'
+		// 		, '_______@example.com'
+		// 		, 'email@example.name'
+		// 		, 'email@example.museum'
+		// 		, 'email@example.co.jp'
+		// 		, 'firstname-lastname@example.com'
+		// 	]
+		// 	, invalidValues: [
+		// 		"plainaddress"
+		// 		, "#@%^%#$@#$@#.com"
+		// 		, "@example.com"
+		// 		, "Joe Smith <email@example.com>"
+		// 		, "email.example.com"
+		// 		, "email@example@example.com"
+		// 		// , ".email@example.com"
+		// 		// , "email.@example.com"
+		// 		// , "email..email@example.com"
+		// 		, "あいうえお@example.com"
+		// 		, "email@example.com (Joe Smith)"
+		// 		// , "email@example"
+		// 		// , "email@-example.com"
+		// 		, "email@example.web"
+		// 		, "email@111.222.333.44444"
+		// 		, "email@example..com"
+		// 		, "Abc..123@example.com"
+		// 	]
+		// }
 	], function (a) {
 		var name = a.name;
 		if (a.param) {
@@ -628,3 +709,83 @@ _.each([
 			});
 		});
 	});
+
+var formsRules = {
+	number: {
+		min: {
+			param: 55
+			, succeedsParam: -1000
+			, expectedError: 'must not be less than 55'
+			, validValues: [100, "100", 55, 65]
+			, invalidValues: [2, "20", 54, 54.99, 1.0]
+		}
+		, max: {
+			param: 55
+			, succeedsParam: 1000
+			, expectedError: 'must not be greater than 55'
+			, validValues: [55, 2, "20", 54, 54.99, 1.0]
+			, invalidValues: [100, "100", 120, 56, 55.11]
+		}
+		, positive: {
+			param: 0
+			, succeedsParam: -1000
+			, expectedError: 'must be a positive value'
+			, validValues: [1,2,3,4,10,100, "100", "12"]
+			, invalidValues: [-1, -2, -50, "-12"]
+		}
+		, negative: {
+			param: 0
+			, succeedsParam: 1000
+			, expectedError: 'must be a negative value'
+			, invalidValues: [1,2,3,4,10,100, "100", "12"]
+			, validValues: [-1, -2, -50, "-12"]
+		}
+	}
+	, text: {
+		minLength: {
+			param: 10
+			, succeedsParam: 0
+			, expectedError: 'must be at least 10 characters'
+			, invalidValues: ['alpha', 'apples', '123456789']
+			, validValues: ['alphaalphaalpha', 'applesapplesapples', '1234567890']
+		}
+		, maxLength: {
+			param: 10
+			, succeedsParam: 1000
+			, expectedError: 'must be at most 10 characters'
+			, validValues: ['alpha', 'apples', '123456789', '1234567890']
+			, invalidValues: ['alphaalphaalpha', 'applesapplesapples', '12345678901']
+		}
+	}
+};
+
+var validateRule = function (test, rule, ruleTests) {
+		_.each(ruleTests.validValues, function (val) {
+			test.isTrue(rule.match(val));
+		});
+		_.each(ruleTests.invalidValues, function (val) {
+			test.throws(function () {
+				rule.check(val);
+			}, ruleTests.expectedError);
+		});	
+};
+
+_.each(formsRules, function (rule, name) {
+	_.each(rule, function (plugin, pname) {
+		Tinytest.add('Rules - pluggable rules - ' + [name, pname].join(' - '), function (test) {
+			test.equal(typeof Rule[name], 'object');
+			test.equal(typeof Rule[name][pname], 'function');
+			var ruleToTest = Rule[name][pname](plugin.param);
+			validateRule(test, ruleToTest, plugin);	
+		});
+		_.each(rule, function (other, otherName) {
+			Tinytest.add('Rules - pluggable rules - ' + [name, pname, otherName].join(' - '), function (test) {
+				var ruleToTest = Rule[name][pname](plugin.param);
+				test.equal(typeof ruleToTest, 'object');
+				test.equal(typeof ruleToTest[otherName], 'function');
+				ruleToTest = ruleToTest[otherName](other.succeedsParam);
+				validateRule(test, ruleToTest, plugin);
+			});
+		});
+	});
+});

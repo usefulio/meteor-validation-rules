@@ -120,3 +120,90 @@ Rule.isInteger = function (interval, message) {
 		
 	], message);
 };
+
+Rule.number = new Rule(Rule.isFinite.rules, 'must be a number');
+Rule.text = new Rule(Rule.isString.rules, 'must be text');
+Rule.email = Rule.matchesRegex(
+	/^[a-zA-Z0-9.!#$%&'*+\/=?^_`{|}~-]+@[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?(?:\.[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?)*$/
+	, 'must be a valid email address'
+	);
+Rule.url = Rule.matchesRegex(
+	/^(http[s]?:\/\/){0,1}(www\.){0,1}[a-zA-Z0-9\.\-]+\.[a-zA-Z]{2,5}[\.]{0,1}/
+	, 'must be a valid url'
+	);
+var attachFunctions = function (rule, ruleDefs) {
+	var rulePlugins = {};
+	_.each(ruleDefs, function (a, i) {
+		rulePlugins[i] = function () {
+			var rule, rules;
+			if (typeof a == 'function') rule = a.apply(null, arguments);
+			else rule = a;
+			if (_.isArray(this.rules)) rules = this.rules;
+			else rules = [this];
+			rules = [rule].concat(rules);
+			var result = new Rule(rules);
+			_.extend(result, rulePlugins);
+			return result;
+		};
+	});
+	_.extend(rule, rulePlugins);
+};
+
+attachFunctions(Rule.number, {
+	min: function (min) {
+		return new Rule(function (val) {
+			return val >= min;
+		}, 'must not be less than ' + min);
+	}
+	, max: function (max) {
+		return new Rule(function (val) {
+			return val <= max;
+		}, 'must not be greater than ' + max);
+	}
+	, positive: function (zeroLine) {
+		zeroLine = zeroLine || 0;
+		return new Rule(function (val) {
+			return val > zeroLine;
+		}, !zeroLine ? 'must be a positive value' : 'must be greater than ' + zeroLine);
+	}
+	, negative: function (zeroLine) {
+		zeroLine = zeroLine || 0;
+		return new Rule(function (val) {
+			return val < zeroLine;
+		}, !zeroLine ? 'must be a negative value' : 'must be less than ' + zeroLine);
+	}
+});
+
+Rule.number.greaterThan = Rule.number.positive;
+Rule.number.lessThan = Rule.number.negative;
+
+attachFunctions(Rule.text, {
+	minLength: function (len) {
+		return new Rule(function (val) {
+			return val.length >= len;
+		}, 'must be at least ' + len + ' characters');
+	}
+	, maxLength: function (len) {
+		return new Rule(function (val) {
+			return val.length <= len;
+		}, 'must be at most ' + len + ' characters');
+	}
+});
+
+attachFunctions(Rule.email, {
+	domain: function (endsWith, message) {
+		message = message || 'must be a ' + endsWith + ' email address';
+		return new Rule(function (val) {
+			return val.indexOf(message) != -1;
+		}, message);
+	}
+});
+
+attachFunctions(Rule.url, {
+	domain: function (endsWith, message) {
+		message = message || 'must be a ' + endsWith + ' url';
+		return new Rule(function (val) {
+			return val.indexOf(message) != -1;
+		}, message);
+	}
+});
