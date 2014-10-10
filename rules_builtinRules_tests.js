@@ -644,9 +644,27 @@ _.each([
 				, null
 			]
 		}
+		, {
+			name: "usPhoneNumber"
+			, expectedError: 'must be a 10 digit phone number'
+			, validValues: [
+				"(123) 123-1234"
+				, "(999) 999-0000"
+				, "(999 999-0000"
+				, "999 999-0000"
+				, "999-999-0000"
+				, "999 999 0000"
+				, "999/999/0000"
+				, "9999990000"
+			]
+			, invalidValues: [
+				"1 (800) 123-1234"
+				, "123-1234"
+			]
+		}
 		// I'm not going to test the email regex, since I know it won't pass all
 		// valid email addresses.
-		
+
 		// , {
 		// 	name: "email"
 		// 	, expectedError: 'must be a valid email address'

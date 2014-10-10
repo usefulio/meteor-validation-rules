@@ -131,6 +131,10 @@ Rule.url = Rule.matchesRegex(
 	/^(http[s]?:\/\/){0,1}(www\.){0,1}[a-zA-Z0-9\.\-]+\.[a-zA-Z]{2,5}[\.]{0,1}/
 	, 'must be a valid url'
 	);
+Rule.usPhoneNumber = new Rule(function (val) {
+	 return val.replace(/[^0-9]/g, '').length == 10;
+}, 'must be a 10 digit phone number');
+
 var attachFunctions = function (rule, ruleDefs) {
 	var rulePlugins = {};
 	_.each(ruleDefs, function (a, i) {
