@@ -1,6 +1,6 @@
 Package.describe({
   summary: "A simple package providing functional validation logic with smart error messages."
-  , version: '0.1.3'
+  , version: "0.1.4"
   , name: "cwohlman:rules"
   , git: "https://github.com/cwohlman/meteor-validation-rules.git"
 });

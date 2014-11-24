@@ -10,6 +10,10 @@ Rule = function (validateFn, statusCode, message) {
 	this.rules = validateFn;
 	this.statusCode = statusCode;
 	this.message = message;
+
+	if (!this.message && !_.isNull(this.message) && typeof this.rules === 'function') {
+		console.log('Rule with undefined message:', this.rules);
+	}
 };
 
 Rule.prototype.check = function(value, context, message) {
